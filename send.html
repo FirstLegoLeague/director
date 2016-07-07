@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
+</head>
+<body>
+    local
+    <video id="localVideo" autoplay></video>
+    remote
+    <video id="remoteVideo" autoplay></video>
+    <script>
+        var localVideo = document.getElementById("localVideo");
+        var remoteVideo = document.getElementById("remoteVideo");
+        var peer = new Peer('test1', {host: 'localhost', port: 9020, path: '/'});
+        // You can pick your own id or omit the id if you want to get a random one from the server.
+        var conn = peer.connect('another-peers-id');
+        conn.on('open', function(){
+            conn.send('hi!');
+        });
+
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+        navigator.getUserMedia({video: true, audio: false}, function(stream) {
+            localVideo.src = URL.createObjectURL(stream);
+            var call = peer.call('test2', stream);
+            call.on('stream', function(remoteStream) {
+                // Show stream in some video/canvas element.
+                remoteVideo.src = URL.createObjectURL(remoteStream);
+            });
+        }, function(err) {
+            console.log('Failed to get local stream' ,err);
+        });
+    </script>
+</body>
+</html>

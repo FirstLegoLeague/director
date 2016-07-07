@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
+</head>
+<body>
+    local
+    <video id="localVideo" autoplay></video>
+    remote
+    <video id="remoteVideo" autoplay></video>
+    <script>
+        var localVideo = document.getElementById("localVideo");
+        var remoteVideo = document.getElementById("remoteVideo");
+        var peer = new Peer('test2', {host: 'apsnlpc059.apsgroup.local', port: 9020, path: '/'});
+        // var peer = new Peer('test2', {host: 'localhost', port: 9020, path: '/'});
+        // You can pick your own id or omit the id if you want to get a random one from the server.
+        peer.on('connection', function(conn) {
+            conn.on('data', function(data){
+                // Will print 'hi!'
+                console.log(data);
+            });
+        });
+
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+        peer.on('call', function(call) {
+            call.on('stream', function(remoteStream) {
+                console.log('stream');
+                // Show stream in some video/canvas element.
+                remoteVideo.src = URL.createObjectURL(remoteStream);
+            });
+            call.answer();
+            // navigator.getUserMedia({video: true, audio: true}, function(stream) {
+            //     localVideo.src = URL.createObjectURL(stream);
+            //     call.answer(stream); // Answer the call with an A/V stream.
+            // }, function(err) {
+            //     console.log('Failed to get local stream' ,err);
+            // });
+        });
+    </script>
+</body>
+</html>
