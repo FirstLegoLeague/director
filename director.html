@@ -3,31 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Document</title>
-    <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
-    <style>
-    	.monitors {
-    		position: absolute;
-    		left: 0;
-    		top: 0;
-    		width: 100%;
-    		height: 100%;
-    	}
-    	.monitor {
-    		float: left;
-    		width: 50%;
-    		height: 50%;
-    		border: 2px solid black;
-    		box-sizing: border-box;
-    	}
-    	.monitor.online {
-    		border-color: lime;
-    	}
-    	video {
-    		width: 100%;
-    		height: 100%;
-    		background-color: black;
-    	}
-    </style>
+    <script src="//cdn.peerjs.com/0.3/peer.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.7/angular.js"></script>
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
 	<div class="monitors">
@@ -44,47 +22,6 @@
 			<video id="video4" autoplay></video>
 		</div>
 	</div>
-    <script>
-        var remoteVideo = document.getElementById("video1");
-        var peer = new Peer('test2', {host: 'apsnlpc059.apsgroup.local', port: 9020, path: '/'});
-        // var peer = new Peer('test2', {host: 'localhost', port: 9020, path: '/'});
-        // You can pick your own id or omit the id if you want to get a random one from the server.
-        peer.on('connection', function(conn) {
-            conn.on('data', function(data){
-                // Will print 'hi!'
-                console.log(data);
-            });
-        });
-
-        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-        peer.on('call', function(call) {
-        	console.log(call);
-            call.on('stream', function(remoteStream) {
-                console.log('stream');
-                // Show stream in some video/canvas element.
-                remoteVideo.src = URL.createObjectURL(remoteStream);
-            });
-            call.answer();
-        });
-
-        function selectMonitor(number) {
-        	var v = document.getElementById('video'+number);
-        	if (v) {
-        		if (currentMonitor) {
-        			currentMonitor.classList.remove('online')
-        		}
-        		currentMonitor = v.parentNode;
-        		currentMonitor.classList.add('online');
-        	}
-        }
-
-        var currentMonitor;
-        document.addEventListener('keydown',function(e) {
-        	var number = e.which-48;
-        	selectMonitor(number);
-        });
-        selectMonitor(1);
-    </script>
+    <script src="js/main.js"></script>
 </body>
 </html>
