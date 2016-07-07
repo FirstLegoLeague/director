@@ -23,7 +23,7 @@
         navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
         navigator.getUserMedia({video: true, audio: false}, function(stream) {
             localVideo.src = URL.createObjectURL(stream);
-            var call = peer.call('test2', stream);
+            var call = peer.call('director', stream);
             call.on('stream', function(remoteStream) {
                 // Show stream in some video/canvas element.
                 remoteVideo.src = URL.createObjectURL(remoteStream);

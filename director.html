@@ -7,21 +7,27 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.7/angular.js"></script>
     <link rel="stylesheet" href="css/main.css">
 </head>
-<body>
-	<div class="monitors">
-		<div class="monitor">
-			<video id="video1" autoplay></video>
-		</div>
-		<div class="monitor">
-			<video id="video2" autoplay></video>
-		</div>
-		<div class="monitor">
-			<video id="video3" autoplay></video>
-		</div>
-		<div class="monitor">
-			<video id="video4" autoplay></video>
-		</div>
-	</div>
+<body ng-app="director">
+    <div class="monitors" ng-controller="displayController as display">
+        <div class="monitor" ng-repeat="monitor in display.monitors" ng-class="{selected:monitor.selected}">
+            <div class="header">
+                <span class="number">{{monitor.index+1}}</span>
+                <select ng-model="monitor.location" ng-change="display.selectLocation(monitor)">
+                    <option value="">None</option>
+                    <option ng-value="'local'">Local</option>
+                    <option ng-value="'remote'">Remote</option>
+                </select>
+                <span ng-if="display.isLocal(monitor)">
+                    <select ng-show="display.isLocal(monitor)" ng-model="monitor.camera" ng-options="camera.label for camera in display.cameras" ng-change="display.selectCamera(monitor)"></select>
+                </span>
+                <span ng-if="display.isRemote(monitor)">
+                    <input ng-model="monitor.peer">
+                </span>
+                <span class="name">{{monitor.name}}</span>
+            </div>
+            <video ng-src="{{monitor.src}}" autoplay></video>
+        </div>
+    </div>
     <script src="js/main.js"></script>
 </body>
 </html>
