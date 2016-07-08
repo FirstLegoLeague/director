@@ -4,33 +4,66 @@
     <meta charset="UTF-8">
     <title>Document</title>
     <script src="//cdn.peerjs.com/0.3/peer.js"></script>
+    <style>
+        html {
+            font-family: verdana, sans-serif;
+        }
+    </style>
 </head>
 <body>
-    local
-    <video id="localVideo" autoplay></video>
-    remote
-    <video id="remoteVideo" autoplay></video>
+    <p>
+        <a href="http://peerjs.com/peerserver">PeerJS key</a> (this is free)
+        <input type="text" id="key">
+        <button onclick="connect()">Connect</button>
+    </p>
+    <div>
+        <p>
+            Camera name
+            <input type="text" id="name" value="test1">
+        </p>
+        <video id="localVideo" autoplay></video>
+    </div>
     <script>
-        var localVideo = document.getElementById("localVideo");
-        var remoteVideo = document.getElementById("remoteVideo");
-        var peer = new Peer('test1', {host: 'localhost', port: 9020, path: '/'});
-        // You can pick your own id or omit the id if you want to get a random one from the server.
-        var conn = peer.connect('another-peers-id');
-        conn.on('open', function(){
-            conn.send('hi!');
-        });
-
         navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+        var cameraStream;
+        var peer;
         navigator.getUserMedia({video: true, audio: false}, function(stream) {
             localVideo.src = URL.createObjectURL(stream);
-            var call = peer.call('director', stream);
-            call.on('stream', function(remoteStream) {
-                // Show stream in some video/canvas element.
-                remoteVideo.src = URL.createObjectURL(remoteStream);
-            });
+            cameraStream = stream;
         }, function(err) {
             console.log('Failed to get local stream' ,err);
         });
+
+        function disconnect() {
+            if (peer) {
+                return new Promise(function(resolve,reject) {
+                    peer.on('disconnected',function() {
+                        console.log('disconnected')
+                        //timeout to free the name on the cloud server
+                        setTimeout(resolve,1000);
+                    })
+                    peer.destroy();
+                })
+            }
+            return Promise.resolve();
+        }
+
+        function connect() {
+            if (cameraStream) {
+                disconnect().then(function() {
+                    console.log('connecting');
+                    var key = document.getElementById('key').value;
+                    var name = document.getElementById('name').value;
+                    var localVideo = document.getElementById("localVideo");
+                    // You can pick your own id or omit the id if you want to get a random one from the server.
+                    peer = new Peer(name, {key: key});
+                    peer.call('director', cameraStream);
+                });
+            } else {
+                alert('please wait for camera');
+            }
+        }
     </script>
 </body>
 </html>

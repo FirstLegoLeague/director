@@ -1,57 +1,62 @@
-var remoteVideo = document.getElementById("video1");
-var peer = new Peer('director', {host: 'localhost', port: 9020, path: '/'});
-// var peer = new Peer('test2', {host: 'localhost', port: 9020, path: '/'});
-// You can pick your own id or omit the id if you want to get a random one from the server.
-peer.on('connection', function(conn) {
-    conn.on('data', function(data){
-        // Will print 'hi!'
-        console.log(data);
-    });
-});
 
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-// peer.on('call', function(call) {
-//     console.log(call);
-//     call.on('stream', function(remoteStream) {
-//         console.log('stream');
-//         // Show stream in some video/canvas element.
-//         remoteVideo.src = URL.createObjectURL(remoteStream);
-//     });
-//     call.answer();
-// });
 
 
 angular.module('director',[]).controller('displayController',function($scope, $sce) {
     var ctrl = this;
 
-    this.monitors = [];
+    ctrl.monitors = [];
     var initial = 4;
-    for (var i = 0; i< initial; i++) {
-        this.monitors.push({index: i});
-    }
 
-    this.currentMonitor = null;
-    this.select = function(monitor) {
-        if (this.currentMonitor) {
-            this.currentMonitor.selected = false;
+    ctrl.currentMonitor = null;
+    ctrl.select = function(monitor) {
+        if (ctrl.currentMonitor) {
+            ctrl.currentMonitor.selected = false;
         }
         monitor.selected = true;
-        this.currentMonitor = monitor;
+        ctrl.currentMonitor = monitor;
     }
 
-    this.select(this.monitors[0]);
-
-    this.isLocal = function(monitor) {
+    ctrl.isLocal = function(monitor) {
         return monitor.location == 'local';
     }
-    this.isRemote = function(monitor) {
+    ctrl.isRemote = function(monitor) {
         return monitor.location == 'remote';
     }
 
-    this.selectLocation = function(monitor) {
+    ctrl.selectLocation = function(monitor) {
         monitor.src = '';
         console.log(monitor.src);
+    }
+
+    function streamTo(stream, monitor) {
+        console.log('stream');
+        // Show stream in some video/canvas element.
+        var url = $sce.trustAsResourceUrl(URL.createObjectURL(stream));
+        monitor.src = url;
+    }
+
+    ctrl.connect = function(key) {
+        ctrl.peer = new Peer('director', {key: key});
+        // var peer = new Peer('director', {host: 'localhost', port: 9020, path: '/'});
+        // var peer = new Peer('test2', {host: 'localhost', port: 9020, path: '/'});
+        // You can pick your own id or omit the id if you want to get a random one from the server.
+        //handle incoming webrtc call
+        ctrl.peer.on('call', function(call) {
+            console.log(call);
+            var newMonitor = {
+                index: ctrl.monitors.length,
+                peer: call.peer,
+                location: 'remote'
+            };
+            ctrl.monitors.push(newMonitor);
+            call.on('stream', function(remoteStream) {
+                streamTo(remoteStream, newMonitor);
+                $scope.$apply();
+            });
+            $scope.$apply();
+            call.answer();
+        });
     }
 
     this.selectCamera = function(monitor) {
@@ -82,20 +87,4 @@ angular.module('director',[]).controller('displayController',function($scope, $s
         });
     });
 
-    //handle incoming webrtc call
-    peer.on('call', function(call) {
-        console.log(call);
-        ctrl.monitors.forEach(function(monitor) {
-            if (monitor.peer === call.peer) {
-                call.on('stream', function(remoteStream) {
-                    console.log('stream');
-                    // Show stream in some video/canvas element.
-                    var url = $sce.trustAsResourceUrl(URL.createObjectURL(remoteStream));
-                    monitor.src = url;
-                    $scope.$apply();
-                });
-                call.answer();
-            }
-        })
-    });
 });

@@ -7,8 +7,15 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.7/angular.js"></script>
     <link rel="stylesheet" href="css/main.css">
 </head>
-<body ng-app="director">
-    <div class="monitors" ng-controller="displayController as display">
+<body ng-app="director" ng-controller="displayController as display">
+    <div class="toolbar">
+        Director
+        <input ng-model="peerKey">
+        <button ng-click="display.connect(peerKey)">Connect</button>
+        <span ng-if="display.peer">Connected!</span>
+        <span ng-if="!display.peer">Disconnected</span>
+    </div>
+    <div class="monitors">
         <div class="monitor" ng-repeat="monitor in display.monitors" ng-class="{selected:monitor.selected}">
             <div class="header">
                 <span class="number">{{monitor.index+1}}</span>
@@ -26,6 +33,7 @@
                 <span class="name">{{monitor.name}}</span>
             </div>
             <video ng-src="{{monitor.src}}" autoplay></video>
+            <div class="safeFrame"></div>
         </div>
     </div>
     <script src="js/main.js"></script>
