@@ -16,6 +16,7 @@
         <input type="text" id="key">
         <button onclick="connect()">Connect</button>
     </p>
+    <div id="error"></div>
     <div>
         <p>
             Camera name
@@ -26,6 +27,7 @@
     <script>
         navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
+        var err = document.getElementById('error');
         var cameraStream;
         var peer;
         navigator.getUserMedia({video: true, audio: false}, function(stream) {
@@ -44,6 +46,7 @@
                         setTimeout(resolve,1000);
                     })
                     peer.destroy();
+                    err.innerText = '';
                 })
             }
             return Promise.resolve();
@@ -58,6 +61,9 @@
                     var localVideo = document.getElementById("localVideo");
                     // You can pick your own id or omit the id if you want to get a random one from the server.
                     peer = new Peer(name, {key: key});
+                    peer.on('error',function(e) {
+                        err.innerText = e;
+                    })
                     peer.call('director', cameraStream);
                 });
             } else {
